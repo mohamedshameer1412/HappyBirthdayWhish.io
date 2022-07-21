@@ -136,15 +136,39 @@
     </div>
   </div>
 
-  <audio src="hbd.mp3" loop id="song">
+  <audio src="hbd.wav" loop id="song">
   </audio>
   <script>
-    window.addEventListener('load', () => {
-      // noinspection JSUnresolvedVariable
-      let audioCtx = new Audio('hbd.wav');
-      audioCtx.play()
+window.addEventListener('load', () => {
+				// noinspection JSUnresolvedVariable
+				let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+				let xhr = new XMLHttpRequest();
+				xhr.open('GET', 'hbd.wav');
+				xhr.responseType = 'arraybuffer';
+				xhr.addEventListener('load', () => {
+					let playsound = (audioBuffer) => {
+						let source = audioCtx.createBufferSource();
+						source.buffer = audioBuffer;
+						source.connect(audioCtx.destination);
+						source.loop = true;
+						source.start();
 
-    });
+						setTimeout(function () {
+							let t = document.createElement('p');
+							t.appendChild(document.createTextNode((new Date()).toLocaleString() + ': Sound played'));
+							document.querySelector('.output').appendChild(t);
+							playsound(audioBuffer);
+						}, 1000 + Math.random()*2500);
+					};
+
+					audioCtx.decodeAudioData(xhr.response).then(playsound);
+				});
+				xhr.send();
+			});
+      )}
+		
+  </script>
+
   </script>
 
 </body>
